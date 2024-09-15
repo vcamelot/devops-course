@@ -1,1 +1,0 @@
-## Devops Course Homework Tasks ##
