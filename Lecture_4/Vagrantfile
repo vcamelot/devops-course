@@ -1,0 +1,63 @@
+SERVERS = [
+  {vm: "webserver4", hostname: "webserver-04"},
+  {vm: "webserver5", hostname: "webserver-05"},
+  {vm: "webserver6", hostname: "webserver-06"}
+]
+
+Vagrant.configure("2") do |config|
+  config.vm.define "webserver1" do |vm1|
+    vm1.vm.box = "ubuntu/xenial64"
+    vm1.vm.disk :disk, name: "default", size: "10GB"
+    vm1.vm.hostname = "webserver-01"
+    vm1.vm.provision "shell", inline: <<-SHELL
+      sudo apt update
+    SHELL
+    vm1.vm.network "public_network"
+    vm1.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = 1
+    end
+    vm1.vm.synced_folder ".vagrant/", "/tmp"
+  end
+  config.vm.define "webserver2" do |vm2|
+    vm2.vm.box = "ubuntu/xenial64"
+    vm2.vm.disk :disk, name: "default", size: "10GB"
+    vm2.vm.hostname = "webserver-02"
+    vm2.vm.provision "shell", path: "install.sh"
+    vm2.vm.network "private_network", ip: "192.168.1.20"
+    vm2.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = 1
+    end
+    vm2.vm.synced_folder ".vagrant/", "/tmp"
+  end
+  config.vm.define "webserver3" do |vm3|
+    vm3.vm.box = "ubuntu/xenial64"
+    vm3.vm.disk :disk, name: "default", size: "10GB"
+    vm3.vm.hostname = "webserver-03"
+    vm3.vm.network "public_network", ip: "192.168.0.40", bridge: "Intel(R) Wireless-AC 9560 160MHz"
+    vm3.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = 1
+    end
+    vm3.vm.synced_folder "C:/Users/Public/Documents", "/var"
+  end
+
+  SERVERS.each do |server|
+    config.vm.define server[:vm] do |serverconfig|
+      serverconfig.vm.box = "ubuntu/xenial64"
+      serverconfig.vm.disk :disk, name: "default", size: "10GB"
+      serverconfig.vm.hostname = server[:hostname]
+      serverconfig.vm.provision "shell", inline: <<-SHELL
+        sudo apt update
+      SHELL
+      serverconfig.vm.network "public_network"
+      serverconfig.vm.provider "virtualbox" do |vb|
+        vb.memory = "1024"
+        vb.cpus = 1
+      end
+      serverconfig.vm.synced_folder ".vagrant/", "/tmp"
+    end  
+  end
+
+end
